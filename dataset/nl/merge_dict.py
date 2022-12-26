@@ -7,7 +7,7 @@ def merge_json_dicts(*dicts, path):
         merged_dict.update(dictionary)
 
     # Write the merged dictionary to a new file
-    with open("wmt17_en_de/vocabulary.json", "w") as f:
+    with open(path+"/vocabulary.json", "w") as f:
         json.dump(merged_dict, f)
 
 # Load the dictionaries from the files
@@ -22,4 +22,4 @@ with open(dict2_file, "r") as f:
     dict2 = json.load(f)
 
 # Merge the dictionaries
-merge_json_dicts(dict1, dict2, path)
+merge_json_dicts(dict1, dict2, path=path)

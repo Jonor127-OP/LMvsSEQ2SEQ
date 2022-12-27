@@ -29,6 +29,7 @@ def main():
         worddict['<eos>'] = 0
         worddict['<sos>'] = 1
         worddict['<unk>'] = 2
+        worddict['<pad>'] = 3
         # FIXME We shouldn't assume <EOS>, <GO>, and <UNK> aren't BPE subwords.
         for ii, ww in enumerate(sorted_words):
             worddict[ww] = ii+3

@@ -140,7 +140,7 @@ BPE_CODE=$prep/code
 #for L in $src $tgt; do
 #    cp $tmp/bpe.test.$L $prep/test.$L
 #done
-
+#
 for L in $src $tgt; do
     echo "build dictionnary for ${L}"
     python build_dictionnary.py $prep/train.$L

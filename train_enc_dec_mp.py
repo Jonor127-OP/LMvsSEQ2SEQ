@@ -33,14 +33,14 @@ def main():
 
     # constants
 
-    EPOCHS = 300
-    BATCH_SIZE = 32
+    EPOCHS = 180
+    BATCH_SIZE = 64
     LEARNING_RATE = 3e-4
-    GENERATE_EVERY  = 100
-    ENC_SEQ_LEN = 100
-    DEC_SEQ_LEN = 100
-    MAX_LEN = 100
-    WARMUP_STEP = 50
+    GENERATE_EVERY  = 20
+    ENC_SEQ_LEN = 120
+    DEC_SEQ_LEN = 120
+    MAX_LEN = 120
+    WARMUP_STEP = 100
 
     model = XTransformer(
         dim = 512,
@@ -110,9 +110,9 @@ def main():
 
             report_loss += loss
 
-            optim.zero_grad()
+            optimizer.zero_grad()
 
-            optim.step()
+            optimizer.step()
             scheduler.step()
 
         print('[Epoch %d] epoch elapsed %ds' % (i, time.time() - start_time))

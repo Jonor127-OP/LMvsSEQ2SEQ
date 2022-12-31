@@ -2,6 +2,7 @@ import argparse
 import json
 import gzip
 
+
 def transform_to_ids(vocab_file, tokenized_file, output_file):
     # Load the vocabulary from the vocab_file
     with open(vocab_file, 'r') as f:
@@ -32,6 +33,7 @@ def transform_to_ids(vocab_file, tokenized_file, output_file):
             ids = [vocab['<sos>']] + [vocab[token] if token in vocab else 2 for token in tokens] + [vocab['<eos>']]
             # Write the ids to the output file
             output_f.write((" ".join([str(id) for id in ids]) + "\n").encode())
+
 
 if __name__ == "__main__":
     # Parse the command-line arguments

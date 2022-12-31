@@ -14,15 +14,14 @@ from utils import TextSamplerDataset, MyCollate, ids_to_tokens, BPE_to_eval, epo
 
 from model.xtransformer import XTransformer
 
-from accelerate import Accelerator
+from accelerate import Accelerator, DistributedDataParallelKwargs
 
 import sacrebleu
 
 def main():
 
-    accelerator = Accelerator()
-
-    device = accelerator.device
+    ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
+    accelerator = Accelerator(kwargs_handlers=[ddp_kwargs])
 
     with open('dataset/nl/wmt17_en_de/vocabulary.json', 'r') as f:
         vocabulary = json.load(f)

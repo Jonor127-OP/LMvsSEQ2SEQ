@@ -47,11 +47,11 @@ def main():
         tie_token_embeds = True,
         return_tgt_loss = True,
         enc_num_tokens=NUM_TOKENS,
-        enc_depth = 3,
+        enc_depth = 6,
         enc_heads = 8,
         enc_max_seq_len = ENC_SEQ_LEN,
         dec_num_tokens = NUM_TOKENS,
-        dec_depth = 3,
+        dec_depth = 6,
         dec_heads = 8,
         dec_max_seq_len = DEC_SEQ_LEN
     ).to(device)

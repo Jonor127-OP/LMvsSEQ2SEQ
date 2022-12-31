@@ -53,7 +53,7 @@ def main():
         dec_depth = 6,
         dec_heads = 8,
         dec_max_seq_len = DEC_SEQ_LEN
-    ).to(device)
+    )
 
     with gzip.open('dataset/nl/wmt17_en_de/train.en.ids.gz', 'r') as file:
         X_train = file.read()

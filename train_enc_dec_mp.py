@@ -34,7 +34,7 @@ def main():
     # constants
 
     EPOCHS = 180
-    BATCH_SIZE = 64
+    BATCH_SIZE = 256
     LEARNING_RATE = 3e-4
     GENERATE_EVERY  = 20
     ENC_SEQ_LEN = 120

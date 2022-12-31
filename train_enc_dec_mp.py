@@ -2,44 +2,45 @@ import gzip
 import numpy as np
 import tqdm
 import json
-
 import time
 
+from torch import optim
 from transformers.optimization import get_constant_schedule_with_warmup
 from model.optimizer import get_optimizer
 
 import torch
 from torch.utils.data import DataLoader
 
-from utils import TextSamplerDataset, MyCollate, BPE_to_eval, ids_to_tokens, epoch_time
+from utils import TextSamplerDataset, MyCollate, ids_to_tokens, BPE_to_eval, epoch_time
 
 from model.xtransformer import XTransformer
 
+from accelerate import Accelerator
 
 import sacrebleu
 
 def main():
 
+    accelerator = Accelerator()
+
+    device = accelerator.device
+
     with open('dataset/nl/wmt17_en_de/vocabulary.json', 'r') as f:
         vocabulary = json.load(f)
 
-    reverse_vocab = {id: token for token, id in vocabulary.items()}
-
     # Get the size of the JSON object
-    NUM_TOKENS = len(reverse_vocab.keys())
+    NUM_TOKENS = len(vocabulary.keys())
 
     # constants
 
     EPOCHS = 300
     BATCH_SIZE = 32
     LEARNING_RATE = 3e-4
-    GENERATE_EVERY  = 20
+    GENERATE_EVERY  = 100
     ENC_SEQ_LEN = 100
     DEC_SEQ_LEN = 100
     MAX_LEN = 100
     WARMUP_STEP = 50
-
-    # instantiate model
 
     model = XTransformer(
         dim = 512,
@@ -53,38 +54,34 @@ def main():
         dec_depth = 3,
         dec_heads = 8,
         dec_max_seq_len = DEC_SEQ_LEN
-    )
+    ).to(device)
 
-    # with gzip.open('dataset/nl/wmt17_en_de/train.en.ids.gz', 'r') as file:
-    #     X_train = file.read()
-    #     X_train = X_train.decode(encoding='utf-8')
-    #     X_train = X_train.split('\n')
-    #     X_train = [np.array([int(x) for x in line.split()]) for line in X_train]
-    #     X_train = X_train[0:10]
-    #
-    # with gzip.open('dataset/nl/wmt17_en_de/train.de.ids.gz', 'r') as file:
-    #     Y_train = file.read()
-    #     Y_train = Y_train.decode(encoding='utf-8')
-    #     Y_train = Y_train.split('\n')
-    #     Y_train = [np.array([int(x) for x in line.split()]) for line in Y_train]
-    #     Y_train = Y_train[0:10]
+    with gzip.open('dataset/nl/wmt17_en_de/train.en.ids.gz', 'r') as file:
+        X_train = file.read()
+        X_train = X_train.decode(encoding='utf-8')
+        X_train = X_train.split('\n')
+        X_train = [np.array([int(x) for x in line.split()]) for line in X_train]
+
+    with gzip.open('dataset/nl/wmt17_en_de/train.de.ids.gz', 'r') as file:
+        Y_train = file.read()
+        Y_train = Y_train.decode(encoding='utf-8')
+        Y_train = Y_train.split('\n')
+        Y_train = [np.array([int(x) for x in line.split()]) for line in Y_train]
 
     with gzip.open('dataset/nl/wmt17_en_de/valid.en.ids.gz', 'r') as file:
         X_dev = file.read()
         X_dev = X_dev.decode(encoding='utf-8')
         X_dev = X_dev.split('\n')
         X_dev = [np.array([int(x) for x in line.split()]) for line in X_dev]
-        X_dev = X_dev[0:20]
 
     with gzip.open('dataset/nl/wmt17_en_de/valid.de.ids.gz', 'r') as file:
         Y_dev = file.read()
         Y_dev = Y_dev.decode(encoding='utf-8')
         Y_dev = Y_dev.split('\n')
         Y_dev = [np.array([int(x) for x in line.split()]) for line in Y_dev]
-        Y_dev = Y_dev[0:20]
 
 
-    train_dataset = TextSamplerDataset(X_dev, Y_dev, MAX_LEN)
+    train_dataset = TextSamplerDataset(X_train, Y_train, MAX_LEN)
     train_loader  = DataLoader(train_dataset, batch_size = BATCH_SIZE, num_workers=0, shuffle=True,
                            pin_memory=True, collate_fn=MyCollate(pad_idx=3))
     dev_dataset = TextSamplerDataset(X_dev, Y_dev, MAX_LEN)
@@ -94,32 +91,29 @@ def main():
     optimizer = get_optimizer(model.parameters(), LEARNING_RATE, wd=0.01)
     scheduler = get_constant_schedule_with_warmup(optimizer, num_warmup_steps=WARMUP_STEP)
 
-    best_bleu = 0
-    report_loss = 0
+    model, optimizer, trainloader = accelerator.prepare(model, optim, train_loader)
 
-    model.train()
+    report_loss = 0.
+    best_bleu = 0
+
     # training
     for i in tqdm.tqdm(range(EPOCHS), desc='training'):
-
         start_time = time.time()
+        model.train()
 
         for src, tgt in train_loader:
 
             mask_src = src != 3
 
             loss = model(src, tgt.type(torch.LongTensor), mask_src=mask_src)
-
-            loss.backward()
+            accelerator.backward(loss)
 
             report_loss += loss
 
-            optimizer.step()
-            optimizer.zero_grad()
-            scheduler.step()
+            optim.zero_grad()
 
+            optim.step()
             scheduler.step()
-
-        print()
 
         print('[Epoch %d] epoch elapsed %ds' % (i, time.time() - start_time))
 
@@ -143,8 +137,8 @@ def main():
                 print(f"target:", tgt)
                 print(f"predicted output:  ", sample)
 
-                target.append(ids_to_tokens(tgt.tolist()[0][1:-1], vocabulary))
-                predicted.append(ids_to_tokens(sample.tolist()[0][:-1], vocabulary))
+                target.append(ids_to_tokens(tgt.tolist()[0], vocabulary))
+                predicted.append(ids_to_tokens(sample.tolist()[0], vocabulary))
 
             target_bleu = [BPE_to_eval(sentence) for sentence in target]
 

@@ -34,7 +34,7 @@ def main():
     # constants
 
     EPOCHS = 180
-    BATCH_SIZE = 256
+    BATCH_SIZE = 128
     LEARNING_RATE = 3e-4
     GENERATE_EVERY  = 20
     ENC_SEQ_LEN = 120
@@ -158,7 +158,7 @@ def main():
                            'output/model_seq2seq.pt'
                            )
 
-                torch.save(optimizer.state_dict(), 'output/optim.bin')
+                torch.save(optimizer.state_dict(), 'output/optim_seq2seq.bin')
 
 
 if __name__ == '__main__':

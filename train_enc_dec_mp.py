@@ -4,7 +4,6 @@ import tqdm
 import json
 import time
 
-from torch import optim
 from transformers.optimization import get_constant_schedule_with_warmup
 from model.optimizer import get_optimizer
 
@@ -91,7 +90,7 @@ def main():
     optimizer = get_optimizer(model.parameters(), LEARNING_RATE, wd=0.01)
     scheduler = get_constant_schedule_with_warmup(optimizer, num_warmup_steps=WARMUP_STEP)
 
-    model, optimizer, trainloader = accelerator.prepare(model, optim, train_loader)
+    model, optimizer, trainloader = accelerator.prepare(model, optimizer, train_loader)
 
     report_loss = 0.
     best_bleu = 0

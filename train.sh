@@ -8,7 +8,7 @@
 
 #SBATCH --error=./logfiles/logfile_wmt.err
 
-#SBATCH --time=05:59:00
+#SBATCH --time=23:59:00
 
 #SBATCH --ntasks=1
 
@@ -17,6 +17,8 @@
 #SBATCH --cpus-per-task=40
 
 #SBATCH --hint=nomultithread
+
+#SBATCH --constraint=v100-32g
 
 
 

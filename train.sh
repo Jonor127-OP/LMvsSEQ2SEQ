@@ -8,7 +8,7 @@
 
 #SBATCH --error=./logfiles/logfile_wmt.err
 
-#SBATCH --time=23:59:00
+#SBATCH --time=72:00:00
 
 #SBATCH --ntasks=1
 
@@ -19,8 +19,6 @@
 #SBATCH --hint=nomultithread
 
 #SBATCH --constraint=v100-32g
-
-
 
 
 module purge

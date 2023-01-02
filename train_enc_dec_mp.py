@@ -32,9 +32,9 @@ def main():
     # constants
 
     EPOCHS = 10
-    BATCH_SIZE = 256
+    BATCH_SIZE = 328
     LEARNING_RATE = 3e-4
-    GENERATE_EVERY  = 20
+    GENERATE_EVERY  = 1
     ENC_SEQ_LEN = 120
     DEC_SEQ_LEN = 120
     MAX_LEN = 120
@@ -99,12 +99,18 @@ def main():
         start_time = time.time()
         model.train()
 
+        countdown = 0
+
         for src, tgt in train_loader:
 
             mask_src = src != 3
 
+            countdown += 1
+
             loss = model(src, tgt.type(torch.LongTensor), mask_src=mask_src)
             accelerator.backward(loss)
+
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 0.01)
 
             report_loss += loss
 
@@ -115,7 +121,7 @@ def main():
 
         print('[Epoch %d] epoch elapsed %ds' % (i, time.time() - start_time))
 
-        log_str = '[EPOCH %d] loss_train=%.5f' % (i, report_loss)
+        log_str = '[EPOCH %d] loss_train=%.5f' % (i, report_loss/countdown)
 
         print(log_str)
 

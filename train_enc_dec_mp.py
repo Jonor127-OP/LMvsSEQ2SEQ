@@ -80,10 +80,10 @@ def main():
 
 
     train_dataset = TextSamplerDataset(X_train, Y_train, MAX_LEN)
-    train_loader  = DataLoader(train_dataset, batch_size = BATCH_SIZE, num_workers=0, shuffle=True,
+    train_loader  = DataLoader(train_dataset, batch_size = BATCH_SIZE, num_workers=4, shuffle=True,
                            pin_memory=True, collate_fn=MyCollate(pad_idx=3))
     dev_dataset = TextSamplerDataset(X_dev, Y_dev, MAX_LEN)
-    dev_loader  = DataLoader(dev_dataset, batch_size=1, num_workers=0)
+    dev_loader  = DataLoader(dev_dataset, batch_size=1, num_workers=4)
 
     # optimizer
     optimizer = get_optimizer(model.parameters(), LEARNING_RATE, wd=0.01)

@@ -91,7 +91,7 @@ def main():
     optimizer = get_optimizer(model.parameters(), LEARNING_RATE, wd=0.01)
     scheduler = get_constant_schedule_with_warmup(optimizer, num_warmup_steps=WARMUP_STEP)
 
-    model, optimizer, trainloader = accelerator.prepare(model, optimizer, train_loader)
+    model, optimizer, train_loader, dev_loader = accelerator.prepare(model, optimizer, train_loader, dev_loader)
 
     report_loss = 0.
     best_bleu = 0

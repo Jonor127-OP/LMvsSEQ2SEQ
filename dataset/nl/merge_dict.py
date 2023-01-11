@@ -1,14 +1,18 @@
 import json
 import sys
 
-def merge_json_dicts(*dicts, path):
-    merged_dict = {}
-    for dictionary in dicts:
-        merged_dict.update(dictionary)
+def merge_json_dicts(dict1, dict2, path):
+
+    max_id = max(dict1.values())
+
+    for word, id in dict2.items():
+        if word not in dict1:
+            max_id += 1
+            dict1[word] = max_id
 
     # Write the merged dictionary to a new file
     with open(path+"/vocabulary.json", "w") as f:
-        json.dump(merged_dict, f)
+        json.dump(dict1, f)
 
 # Load the dictionaries from the files
 dict1_file = sys.argv[1]

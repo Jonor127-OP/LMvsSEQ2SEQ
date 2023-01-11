@@ -10,13 +10,13 @@ import json
 
 def main():
     i = 4
+    worddict = OrderedDict()
+    worddict['<eos>'] = 0
+    worddict['<sos>'] = 1
+    worddict['<unk>'] = 2
+    worddict['<pad>'] = 3
     for filename in sys.argv[1:]:
         print('Processing', filename)
-        worddict = OrderedDict()
-        worddict['<eos>'] = 0
-        worddict['<sos>'] = 1
-        worddict['<unk>'] = 2
-        worddict['<pad>'] = 3
         with open(filename, 'r', encoding='utf-8') as f:
             for line in f:
                 words_in = line.strip().split(' ')

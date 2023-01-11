@@ -127,6 +127,12 @@ def main():
 
         report_loss = 0
 
+        torch.save(model.state_dict(),
+                   'output/model_seq2seq_each_epoch.pt'
+                   )
+
+        torch.save(optimizer.state_dict(), 'output/optim_seq2seq_each_epoch.bin')
+
         if i != 0 and i % GENERATE_EVERY == 0:
 
             model.eval()
@@ -163,6 +169,7 @@ def main():
                            )
 
                 torch.save(optimizer.state_dict(), 'output/optim_seq2seq.bin')
+
 
 
 if __name__ == '__main__':

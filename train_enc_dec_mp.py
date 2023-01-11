@@ -59,12 +59,14 @@ def main():
         X_train = X_train.decode(encoding='utf-8')
         X_train = X_train.split('\n')
         X_train = [np.array([int(x) for x in line.split()]) for line in X_train]
+        X_train = X_train[:512]
 
     with gzip.open('dataset/nl/wmt17_en_de/train.de.ids.gz', 'r') as file:
         Y_train = file.read()
         Y_train = Y_train.decode(encoding='utf-8')
         Y_train = Y_train.split('\n')
         Y_train = [np.array([int(x) for x in line.split()]) for line in Y_train]
+        Y_train = Y_train[:512]
 
     with gzip.open('dataset/nl/wmt17_en_de/valid.en.ids.gz', 'r') as file:
         X_dev = file.read()
@@ -135,11 +137,11 @@ def main():
             for src, tgt in dev_loader:
                 start_tokens = (torch.ones((1, 1)) * 1).long()
 
-                sample = model.generate(src, start_tokens, MAX_LEN)
+                sample = accelerator.unwrap_model(model).generate(src, start_tokens, MAX_LEN)
 
-                print(f"input:  ", src)
-                print(f"target:", tgt)
-                print(f"predicted output:  ", sample)
+                # print(f"input:  ", src)
+                # print(f"target:", tgt)
+                # print(f"predicted output:  ", sample)
 
                 target.append(ids_to_tokens(tgt.tolist()[0], vocabulary))
                 predicted.append(ids_to_tokens(sample.tolist()[0], vocabulary))

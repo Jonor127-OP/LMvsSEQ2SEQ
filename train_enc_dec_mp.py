@@ -134,7 +134,7 @@ def main():
             model.eval()
             target = []
             predicted = []
-            for src, tgt in dev_loader:
+            for src, tgt in train_loader:
                 start_tokens = (torch.ones((1, 1)) * 1).long().cuda()
 
                 sample = model.module.generate(src, start_tokens, MAX_LEN)

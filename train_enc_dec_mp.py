@@ -59,24 +59,28 @@ def main():
         X_train = X_train.decode(encoding='utf-8')
         X_train = X_train.split('\n')
         X_train = [np.array([int(x) for x in line.split()]) for line in X_train]
+        X_train = X_train[:256]
 
     with gzip.open('dataset/nl/wmt17_en_de/train.de.ids.gz', 'r') as file:
         Y_train = file.read()
         Y_train = Y_train.decode(encoding='utf-8')
         Y_train = Y_train.split('\n')
         Y_train = [np.array([int(x) for x in line.split()]) for line in Y_train]
+        Y_train = Y_train[:256]
 
     with gzip.open('dataset/nl/wmt17_en_de/valid.en.ids.gz', 'r') as file:
         X_dev = file.read()
         X_dev = X_dev.decode(encoding='utf-8')
         X_dev = X_dev.split('\n')
         X_dev = [np.array([int(x) for x in line.split()]) for line in X_dev]
+        X_dev = X_dev[:10]
 
     with gzip.open('dataset/nl/wmt17_en_de/valid.de.ids.gz', 'r') as file:
         Y_dev = file.read()
         Y_dev = Y_dev.decode(encoding='utf-8')
         Y_dev = Y_dev.split('\n')
         Y_dev = [np.array([int(x) for x in line.split()]) for line in Y_dev]
+        Y_dev = Y_dev[:10]
 
 
     train_dataset = TextSamplerDataset(X_train, Y_train, MAX_LEN)

@@ -135,7 +135,7 @@ def main():
             target = []
             predicted = []
             for src, tgt in dev_loader:
-                start_tokens = (torch.ones((1, 1)) * 1).long()
+                start_tokens = (torch.ones((1, 1)) * 1).long().cuda()
 
                 sample = accelerator.unwrap_model(model).generate(src, start_tokens, MAX_LEN)
 

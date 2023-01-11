@@ -73,12 +73,14 @@ def main():
         X_dev = X_dev.decode(encoding='utf-8')
         X_dev = X_dev.split('\n')
         X_dev = [np.array([int(x) for x in line.split()]) for line in X_dev]
+        X_dev = X_dev[:10]
 
     with gzip.open('dataset/nl/wmt17_en_de/valid.de.ids.gz', 'r') as file:
         Y_dev = file.read()
         Y_dev = Y_dev.decode(encoding='utf-8')
         Y_dev = Y_dev.split('\n')
         Y_dev = [np.array([int(x) for x in line.split()]) for line in Y_dev]
+        Y_dev = Y_dev[:10]
 
 
     train_dataset = TextSamplerDataset(X_train, Y_train, MAX_LEN)
@@ -134,7 +136,7 @@ def main():
             model.eval()
             target = []
             predicted = []
-            for src, tgt in train_loader:
+            for src, tgt in dev_loader:
                 start_tokens = (torch.ones((1, 1)) * 1).long().cuda()
 
                 sample = model.module.generate(src, start_tokens, MAX_LEN)

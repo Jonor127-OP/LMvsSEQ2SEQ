@@ -564,7 +564,7 @@ class FeedForward(nn.Module):
             swish=False,
             relu_squared=False,
             post_act_ln=False,
-            dropout=0.1,
+            dropout=0.,
             no_bias=False,
             zero_init_output=False
     ):
@@ -612,7 +612,7 @@ class Attention(nn.Module):
             head_scale=False,
             sparse_topk=None,
             num_mem_kv=0,
-            dropout=0.1,
+            dropout=0.,
             on_attn=False,
             gate_values=False,
             zero_init_output=False,

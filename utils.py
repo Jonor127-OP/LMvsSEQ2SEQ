@@ -23,6 +23,9 @@ def epoch_time(start_time, end_time):
     return elapsed_mins, elapsed_secs
 
 
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
 class TextSamplerDataset(Dataset):
     def __init__(self, X, Y, max_len):
         # Get source and target texts

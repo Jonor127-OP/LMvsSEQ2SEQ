@@ -10,7 +10,7 @@ from model.optimizer import get_optimizer
 import torch
 from torch.utils.data import DataLoader
 
-from utils import TextSamplerDataset, MyCollate, ids_to_tokens, BPE_to_eval, epoch_time
+from utils import TextSamplerDataset, MyCollate, ids_to_tokens, BPE_to_eval, epoch_time, count_parameters
 
 from model.xtransformer import XTransformer
 
@@ -31,10 +31,10 @@ def main():
 
     # constants
 
-    EPOCHS = 10
+    EPOCHS = 40
     BATCH_SIZE = 156
     LEARNING_RATE = 3e-4
-    GENERATE_EVERY  = 2
+    GENERATE_EVERY  = 1
     ENC_SEQ_LEN = 120
     DEC_SEQ_LEN = 120
     MAX_LEN = 120
@@ -54,42 +54,48 @@ def main():
         dec_max_seq_len = DEC_SEQ_LEN
     )
 
+    print('number of parameters:', count_parameters(model))
+
     with gzip.open('dataset/nl/wmt17_en_de/train.en.ids.gz', 'r') as file:
         X_train = file.read()
         X_train = X_train.decode(encoding='utf-8')
         X_train = X_train.split('\n')
         X_train = [np.array([int(x) for x in line.split()]) for line in X_train]
+        X_train = X_train[:128]
 
     with gzip.open('dataset/nl/wmt17_en_de/train.de.ids.gz', 'r') as file:
         Y_train = file.read()
         Y_train = Y_train.decode(encoding='utf-8')
         Y_train = Y_train.split('\n')
         Y_train = [np.array([int(x) for x in line.split()]) for line in Y_train]
+        Y_train = Y_train[:128]
 
-    with gzip.open('dataset/nl/wmt17_en_de/valid.en.ids.gz', 'r') as file:
-        X_dev = file.read()
-        X_dev = X_dev.decode(encoding='utf-8')
-        X_dev = X_dev.split('\n')
-        X_dev = [np.array([int(x) for x in line.split()]) for line in X_dev]
-
-    with gzip.open('dataset/nl/wmt17_en_de/valid.de.ids.gz', 'r') as file:
-        Y_dev = file.read()
-        Y_dev = Y_dev.decode(encoding='utf-8')
-        Y_dev = Y_dev.split('\n')
-        Y_dev = [np.array([int(x) for x in line.split()]) for line in Y_dev]
+    # with gzip.open('dataset/nl/wmt17_en_de/valid.en.ids.gz', 'r') as file:
+    #     X_dev = file.read()
+    #     X_dev = X_dev.decode(encoding='utf-8')
+    #     X_dev = X_dev.split('\n')
+    #     X_dev = [np.array([int(x) for x in line.split()]) for line in X_dev]
+    #
+    # with gzip.open('dataset/nl/wmt17_en_de/valid.de.ids.gz', 'r') as file:
+    #     Y_dev = file.read()
+    #     Y_dev = Y_dev.decode(encoding='utf-8')
+    #     Y_dev = Y_dev.split('\n')
+    #     Y_dev = [np.array([int(x) for x in line.split()]) for line in Y_dev]
 
 
     train_dataset = TextSamplerDataset(X_train, Y_train, MAX_LEN)
     train_loader  = DataLoader(train_dataset, batch_size = BATCH_SIZE, num_workers=4, shuffle=True,
                            pin_memory=True, collate_fn=MyCollate(pad_idx=3))
-    dev_dataset = TextSamplerDataset(X_dev, Y_dev, MAX_LEN)
-    dev_loader  = DataLoader(dev_dataset, batch_size=1, num_workers=4)
+    dev_dataset = TextSamplerDataset(X_train, X_train, MAX_LEN)
+    dev_loader  = DataLoader(dev_dataset, batch_size=1)
+    # dev_dataset = TextSamplerDataset(X_dev, Y_dev, MAX_LEN)
+    # dev_loader  = DataLoader(dev_dataset, batch_size=1)
 
     # optimizer
     optimizer = get_optimizer(model.parameters(), LEARNING_RATE, wd=0.01)
     scheduler = get_constant_schedule_with_warmup(optimizer, num_warmup_steps=WARMUP_STEP)
 
-    model, optimizer, train_loader, dev_loader = accelerator.prepare(model, optimizer, train_loader, dev_loader)
+    model, optimizer, train_loader = accelerator.prepare(model, optimizer, train_loader, dev_loader)
 
     report_loss = 0.
     best_bleu = 0
@@ -169,7 +175,6 @@ def main():
                            )
 
                 torch.save(optimizer.state_dict(), 'output/optim_seq2seq.bin')
-
 
 
 if __name__ == '__main__':

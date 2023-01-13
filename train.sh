@@ -2,13 +2,13 @@
 
 #SBATCH --job-name=wmt-en2de
 
-#SBATCH --qos=qos_gpu-t4
+#SBATCH --qos=qos_gpu-dev
 
 #SBATCH --output=./logfiles/logfile_wmt.out
 
 #SBATCH --error=./logfiles/logfile_wmt.err
 
-#SBATCH --time=80:00:00
+#SBATCH --time=01:00:00
 
 #SBATCH --ntasks=1
 

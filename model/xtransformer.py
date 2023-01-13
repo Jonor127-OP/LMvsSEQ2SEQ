@@ -564,7 +564,7 @@ class FeedForward(nn.Module):
             swish=False,
             relu_squared=False,
             post_act_ln=False,
-            dropout=0.,
+            dropout=0.1,
             no_bias=False,
             zero_init_output=False
     ):
@@ -612,7 +612,7 @@ class Attention(nn.Module):
             head_scale=False,
             sparse_topk=None,
             num_mem_kv=0,
-            dropout=0.,
+            dropout=0.1,
             on_attn=False,
             gate_values=False,
             zero_init_output=False,
@@ -1443,9 +1443,9 @@ class XTransformer(nn.Module):
             dim,
             tie_token_emb=False,
             ignore_index=-100,
-            pad_value=0,
+            pad_value=3,
             deepnorm=False,
-            cross_attn_tokens_dropout=0.,
+            cross_attn_tokens_dropout=0.1,
             **kwargs
     ):
         super().__init__()

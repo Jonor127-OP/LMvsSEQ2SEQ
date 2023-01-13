@@ -26,15 +26,17 @@ def main():
     with open('dataset/nl/wmt17_en_de/vocabulary.json', 'r') as f:
         vocabulary = json.load(f)
 
+    reverse_vocab = {id: token for token, id in vocabulary.items()}
+
     # Get the size of the JSON object
-    NUM_TOKENS = len(vocabulary.keys())
+    NUM_TOKENS = len(reverse_vocab.keys())
 
     # constants
 
     EPOCHS = 80
-    BATCH_SIZE = 156
+    BATCH_SIZE = 10
     LEARNING_RATE = 3e-4
-    GENERATE_EVERY  = 1
+    GENERATE_EVERY  = 10
     ENC_SEQ_LEN = 120
     DEC_SEQ_LEN = 120
     MAX_LEN = 120
@@ -67,20 +69,34 @@ def main():
     #     Y_train = Y_train.decode(encoding='utf-8')
     #     Y_train = Y_train.split('\n')
     #     Y_train = [np.array([int(x) for x in line.split()]) for line in Y_train]
+    #
+    # with gzip.open('dataset/nl/wmt17_en_de/valid.en.ids.gz', 'r') as file:
+    #     X_dev = file.read()
+    #     X_dev = X_dev.decode(encoding='utf-8')
+    #     X_dev = X_dev.split('\n')
+    #     X_dev = [np.array([int(x) for x in line.split()]) for line in X_dev]
+    #     X_dev = X_dev[:512]
+    #
+    # with gzip.open('dataset/nl/wmt17_en_de/valid.de.ids.gz', 'r') as file:
+    #     Y_dev = file.read()
+    #     Y_dev = Y_dev.decode(encoding='utf-8')
+    #     Y_dev = Y_dev.split('\n')
+    #     Y_dev = [np.array([int(x) for x in line.split()]) for line in Y_dev]
+    #     Y_dev = Y_dev[:512]
 
     with gzip.open('dataset/nl/wmt17_en_de/valid.en.ids.gz', 'r') as file:
         X_dev = file.read()
         X_dev = X_dev.decode(encoding='utf-8')
         X_dev = X_dev.split('\n')
         X_dev = [np.array([int(x) for x in line.split()]) for line in X_dev]
-        X_dev = X_dev[:512]
+        X_dev = X_dev[0:20]
 
     with gzip.open('dataset/nl/wmt17_en_de/valid.de.ids.gz', 'r') as file:
         Y_dev = file.read()
         Y_dev = Y_dev.decode(encoding='utf-8')
         Y_dev = Y_dev.split('\n')
         Y_dev = [np.array([int(x) for x in line.split()]) for line in Y_dev]
-        Y_dev = Y_dev[:512]
+        Y_dev = Y_dev[0:20]
 
 
     # train_dataset = TextSamplerDataset(X_train, Y_train, MAX_LEN)
@@ -96,7 +112,7 @@ def main():
     optimizer = get_optimizer(model.parameters(), LEARNING_RATE, wd=0.01)
     scheduler = get_constant_schedule_with_warmup(optimizer, num_warmup_steps=WARMUP_STEP)
 
-    model, optimizer, train_loader, dev_loader = accelerator.prepare(model, optimizer, train_loader, dev_loader)
+    model, optimizer, train_loader = accelerator.prepare(model, optimizer, train_loader)
 
     report_loss = 0.
     best_bleu = 0
@@ -115,15 +131,15 @@ def main():
             countdown += 1
 
             loss = model(src, tgt.type(torch.LongTensor), mask_src=mask_src)
+            print(loss)
             accelerator.backward(loss)
 
             torch.nn.utils.clip_grad_norm_(model.parameters(), 0.01)
 
-            report_loss += loss
-
-            optimizer.zero_grad()
+            report_loss += loss.item()
 
             optimizer.step()
+            optimizer.zero_grad()
             scheduler.step()
 
         print('[Epoch %d] epoch elapsed %ds' % (i, time.time() - start_time))

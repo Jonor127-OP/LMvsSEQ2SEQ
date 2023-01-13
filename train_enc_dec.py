@@ -117,7 +117,6 @@ def main():
             optimizer.zero_grad()
             scheduler.step()
 
-            scheduler.step()
 
         print()
 

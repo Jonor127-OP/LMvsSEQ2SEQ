@@ -36,7 +36,7 @@ def main():
     EPOCHS = 80
     BATCH_SIZE = 10
     LEARNING_RATE = 3e-4
-    GENERATE_EVERY  = 10
+    GENERATE_EVERY  = 40
     ENC_SEQ_LEN = 120
     DEC_SEQ_LEN = 120
     MAX_LEN = 120
@@ -89,14 +89,14 @@ def main():
         X_dev = X_dev.decode(encoding='utf-8')
         X_dev = X_dev.split('\n')
         X_dev = [np.array([int(x) for x in line.split()]) for line in X_dev]
-        X_dev = X_dev[0:20]
+        X_dev = X_dev[0:100]
 
     with gzip.open('dataset/nl/wmt17_en_de/valid.de.ids.gz', 'r') as file:
         Y_dev = file.read()
         Y_dev = Y_dev.decode(encoding='utf-8')
         Y_dev = Y_dev.split('\n')
         Y_dev = [np.array([int(x) for x in line.split()]) for line in Y_dev]
-        Y_dev = Y_dev[0:20]
+        Y_dev = Y_dev[0:100]
 
 
     # train_dataset = TextSamplerDataset(X_train, Y_train, MAX_LEN)

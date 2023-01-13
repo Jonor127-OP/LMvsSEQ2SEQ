@@ -87,7 +87,7 @@ def main():
     train_loader  = DataLoader(train_dataset, batch_size = BATCH_SIZE, num_workers=4, shuffle=True,
                            pin_memory=True, collate_fn=MyCollate(pad_idx=3))
     dev_dataset = TextSamplerDataset(X_train, X_train, MAX_LEN)
-    dev_loader  = DataLoader(dev_dataset, batch_size=1)
+    dev_loader  = DataLoader(dev_dataset, batch_size=1, num_workers=4)
     # dev_dataset = TextSamplerDataset(X_dev, Y_dev, MAX_LEN)
     # dev_loader  = DataLoader(dev_dataset, batch_size=1)
 
@@ -95,7 +95,7 @@ def main():
     optimizer = get_optimizer(model.parameters(), LEARNING_RATE, wd=0.01)
     scheduler = get_constant_schedule_with_warmup(optimizer, num_warmup_steps=WARMUP_STEP)
 
-    model, optimizer, train_loader = accelerator.prepare(model, optimizer, train_loader)
+    model, optimizer, train_loader, dev_loader = accelerator.prepare(model, optimizer, train_loader, dev_loader)
 
     report_loss = 0.
     best_bleu = 0

@@ -33,10 +33,10 @@ def main():
 
     # constants
 
-    EPOCHS = 80
+    EPOCHS = 200
     BATCH_SIZE = 10
     LEARNING_RATE = 3e-4
-    GENERATE_EVERY  = 40
+    GENERATE_EVERY  = 10
     ENC_SEQ_LEN = 120
     DEC_SEQ_LEN = 120
     MAX_LEN = 120

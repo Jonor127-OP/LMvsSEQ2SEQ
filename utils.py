@@ -66,3 +66,12 @@ class MyCollate:
         # pad them using pad_sequence method from pytorch.
         target = pad_sequence(target, batch_first=True, padding_value=self.pad_idx)
         return source, target
+
+
+def mpp_generate_postprocessing(list, eos_token):
+    try:
+        target_index = list.index(eos_token) + 1
+    except ValueError:
+        target_index = None
+
+    return list[:target_index]

@@ -10,7 +10,7 @@ from model.optimizer import get_optimizer
 import torch
 from torch.utils.data import DataLoader
 
-from utils import TextSamplerDataset, MyCollate, ids_to_tokens, BPE_to_eval, epoch_time, count_parameters
+from utils import TextSamplerDataset, MyCollate, ids_to_tokens, BPE_to_eval, epoch_time, count_parameters, mpp_generate_postprocessing
 
 from model.xtransformer import XTransformer
 
@@ -34,7 +34,7 @@ def main():
     # constants
 
     EPOCHS = 200
-    BATCH_SIZE = 10
+    BATCH_SIZE = 156
     LEARNING_RATE = 3e-4
     GENERATE_EVERY  = 10
     ENC_SEQ_LEN = 120
@@ -131,7 +131,7 @@ def main():
             countdown += 1
 
             loss = model(src, tgt.type(torch.LongTensor), mask_src=mask_src)
-            print(loss)
+
             accelerator.backward(loss)
 
             torch.nn.utils.clip_grad_norm_(model.parameters(), 0.01)
@@ -165,6 +165,8 @@ def main():
                 start_tokens = (torch.ones((1, 1)) * 1).long().cuda()
 
                 sample = model.module.generate(src, start_tokens, MAX_LEN)
+
+                sample = mpp_generate_postprocessing(sample, eos_token=0)
 
                 print(f"input:  ", src)
                 print(f"target:", tgt)

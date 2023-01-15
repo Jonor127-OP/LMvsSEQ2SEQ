@@ -33,14 +33,14 @@ def main():
 
     # constants
 
-    EPOCHS = 200
+    EPOCHS = 10
     BATCH_SIZE = 156
     LEARNING_RATE = 3e-4
-    GENERATE_EVERY  = 10
+    GENERATE_EVERY  = 1
     ENC_SEQ_LEN = 120
     DEC_SEQ_LEN = 120
     MAX_LEN = 120
-    WARMUP_STEP = 0
+    WARMUP_STEP = 1000
 
     model = XTransformer(
         dim = 512,
@@ -58,51 +58,46 @@ def main():
 
     print('number of parameters:', count_parameters(model))
 
-    # with gzip.open('dataset/nl/wmt17_en_de/train.en.ids.gz', 'r') as file:
-    #     X_train = file.read()
-    #     X_train = X_train.decode(encoding='utf-8')
-    #     X_train = X_train.split('\n')
-    #     X_train = [np.array([int(x) for x in line.split()]) for line in X_train]
-    #
-    # with gzip.open('dataset/nl/wmt17_en_de/train.de.ids.gz', 'r') as file:
-    #     Y_train = file.read()
-    #     Y_train = Y_train.decode(encoding='utf-8')
-    #     Y_train = Y_train.split('\n')
-    #     Y_train = [np.array([int(x) for x in line.split()]) for line in Y_train]
-    #
-    # with gzip.open('dataset/nl/wmt17_en_de/valid.en.ids.gz', 'r') as file:
-    #     X_dev = file.read()
-    #     X_dev = X_dev.decode(encoding='utf-8')
-    #     X_dev = X_dev.split('\n')
-    #     X_dev = [np.array([int(x) for x in line.split()]) for line in X_dev]
-    #     X_dev = X_dev[:512]
-    #
-    # with gzip.open('dataset/nl/wmt17_en_de/valid.de.ids.gz', 'r') as file:
-    #     Y_dev = file.read()
-    #     Y_dev = Y_dev.decode(encoding='utf-8')
-    #     Y_dev = Y_dev.split('\n')
-    #     Y_dev = [np.array([int(x) for x in line.split()]) for line in Y_dev]
-    #     Y_dev = Y_dev[:512]
+    with gzip.open('dataset/nl/wmt17_en_de/train.en.ids.gz', 'r') as file:
+        X_train = file.read()
+        X_train = X_train.decode(encoding='utf-8')
+        X_train = X_train.split('\n')
+        X_train = [np.array([int(x) for x in line.split()]) for line in X_train]
+
+    with gzip.open('dataset/nl/wmt17_en_de/train.de.ids.gz', 'r') as file:
+        Y_train = file.read()
+        Y_train = Y_train.decode(encoding='utf-8')
+        Y_train = Y_train.split('\n')
+        Y_train = [np.array([int(x) for x in line.split()]) for line in Y_train]
 
     with gzip.open('dataset/nl/wmt17_en_de/valid.en.ids.gz', 'r') as file:
         X_dev = file.read()
         X_dev = X_dev.decode(encoding='utf-8')
         X_dev = X_dev.split('\n')
         X_dev = [np.array([int(x) for x in line.split()]) for line in X_dev]
-        X_dev = X_dev[0:100]
 
     with gzip.open('dataset/nl/wmt17_en_de/valid.de.ids.gz', 'r') as file:
         Y_dev = file.read()
         Y_dev = Y_dev.decode(encoding='utf-8')
         Y_dev = Y_dev.split('\n')
         Y_dev = [np.array([int(x) for x in line.split()]) for line in Y_dev]
-        Y_dev = Y_dev[0:100]
+
+    # with gzip.open('dataset/nl/wmt17_en_de/valid.en.ids.gz', 'r') as file:
+    #     X_dev = file.read()
+    #     X_dev = X_dev.decode(encoding='utf-8')
+    #     X_dev = X_dev.split('\n')
+    #     X_dev = [np.array([int(x) for x in line.split()]) for line in X_dev]
+    #     X_dev = X_dev[0:10]
+    #
+    # with gzip.open('dataset/nl/wmt17_en_de/valid.de.ids.gz', 'r') as file:
+    #     Y_dev = file.read()
+    #     Y_dev = Y_dev.decode(encoding='utf-8')
+    #     Y_dev = Y_dev.split('\n')
+    #     Y_dev = [np.array([int(x) for x in line.split()]) for line in Y_dev]
+    #     Y_dev = Y_dev[0:10]
 
 
-    # train_dataset = TextSamplerDataset(X_train, Y_train, MAX_LEN)
-    # train_loader  = DataLoader(train_dataset, batch_size = BATCH_SIZE, num_workers=4, shuffle=True,
-    #                        pin_memory=True, collate_fn=MyCollate(pad_idx=3))
-    train_dataset = TextSamplerDataset(X_dev, Y_dev, MAX_LEN)
+    train_dataset = TextSamplerDataset(X_train, Y_train, MAX_LEN)
     train_loader  = DataLoader(train_dataset, batch_size = BATCH_SIZE, num_workers=4, shuffle=True,
                            pin_memory=True, collate_fn=MyCollate(pad_idx=3))
     dev_dataset = TextSamplerDataset(X_dev, Y_dev, MAX_LEN)
@@ -164,13 +159,13 @@ def main():
             for src, tgt in dev_loader:
                 start_tokens = (torch.ones((1, 1)) * 1).long().cuda()
 
-                sample = model.module.generate(src, start_tokens, MAX_LEN)
+                sample = model.generate(src, start_tokens, MAX_LEN)
 
                 sample = mpp_generate_postprocessing(sample, eos_token=0)
 
-                print(f"input:  ", src)
-                print(f"target:", tgt)
-                print(f"predicted output:  ", sample)
+                # print(f"input:  ", src)
+                # print(f"target:", tgt)
+                # print(f"predicted output:  ", sample)
 
                 target.append(ids_to_tokens(tgt.tolist()[0], vocabulary))
                 predicted.append(ids_to_tokens(sample.tolist()[0], vocabulary))

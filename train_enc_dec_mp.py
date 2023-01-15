@@ -159,7 +159,7 @@ def main():
             for src, tgt in dev_loader:
                 start_tokens = (torch.ones((1, 1)) * 1).long().cuda()
 
-                sample = model.generate(src, start_tokens, MAX_LEN)
+                sample = model.module.generate(src, start_tokens, MAX_LEN)
 
                 sample = mpp_generate_postprocessing(sample, eos_token=0)
 

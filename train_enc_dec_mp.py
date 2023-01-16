@@ -3,6 +3,7 @@ import numpy as np
 import tqdm
 import json
 import time
+import datetime
 
 from transformers.optimization import get_constant_schedule_with_warmup
 from model.optimizer import get_optimizer
@@ -14,14 +15,15 @@ from utils import TextSamplerDataset, MyCollate, ids_to_tokens, BPE_to_eval, epo
 
 from model.xtransformer import XTransformer
 
-from accelerate import Accelerator, DistributedDataParallelKwargs
+from accelerate import Accelerator, DistributedDataParallelKwargs, InitProcessGroupKwargs
 
 import sacrebleu
 
 def main():
 
-    ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
-    accelerator = Accelerator(kwargs_handlers=[ddp_kwargs])
+    ddp_kwargs_1 = DistributedDataParallelKwargs(find_unused_parameters=True)
+    ddp_kwargs_2 = InitProcessGroupKwargs(timeout=datetime.timedelta(seconds=5400))
+    accelerator = Accelerator(kwargs_handlers=[ddp_kwargs_1, ddp_kwargs_2])
 
     with open('dataset/nl/wmt17_en_de/vocabulary.json', 'r') as f:
         vocabulary = json.load(f)

@@ -203,5 +203,106 @@ def main():
                 torch.save(optimizer.state_dict(), 'output/optim_seq2seq.bin')
 
 
+def test():
+
+    ddp_kwargs_1 = DistributedDataParallelKwargs(find_unused_parameters=True)
+    ddp_kwargs_2 = InitProcessGroupKwargs(timeout=datetime.timedelta(seconds=5400))
+    accelerator = Accelerator(kwargs_handlers=[ddp_kwargs_1, ddp_kwargs_2])
+
+    with open('dataset/nl/wmt17_en_de/vocabulary.json', 'r') as f:
+        vocabulary = json.load(f)
+
+    reverse_vocab = {id: token for token, id in vocabulary.items()}
+
+    # Get the size of the JSON object
+    NUM_TOKENS = len(reverse_vocab.keys())
+
+    # constants
+    ENC_SEQ_LEN = 120
+    DEC_SEQ_LEN = 120
+    MAX_LEN = 120 * 2
+
+
+    with gzip.open('dataset/nl/wmt17_en_de/test.en.ids.gz', 'r') as file:
+        X_dev = file.read()
+        X_dev = X_dev.decode(encoding='utf-8')
+        X_dev = X_dev.split('\n')
+        X_dev = [np.array([int(x) for x in line.split()]) for line in X_dev]
+
+    with gzip.open('dataset/nl/wmt17_en_de/test.de.ids.gz', 'r') as file:
+        Y_dev = file.read()
+        Y_dev = Y_dev.decode(encoding='utf-8')
+        Y_dev = Y_dev.split('\n')
+        Y_dev = [np.array([int(x) for x in line.split()]) for line in Y_dev]
+
+    test_dataset = TextSamplerDataset(X_dev, Y_dev, MAX_LEN)
+    test_loader  = DataLoader(test_dataset, batch_size=1)
+
+    model = XTransformer(
+        dim=512,
+        tie_token_embeds=True,
+        return_tgt_loss=True,
+        enc_num_tokens=NUM_TOKENS,
+        enc_depth=6,
+        enc_heads=8,
+        enc_max_seq_len=ENC_SEQ_LEN,
+        dec_num_tokens=NUM_TOKENS,
+        dec_depth=6,
+        dec_heads=8,
+        dec_max_seq_len=DEC_SEQ_LEN
+    )
+
+    model, test_loader = accelerator.prepare(model, test_loader)
+
+    model.load_state_dict(
+        torch.load(
+            'output/model_seq2seq.pt',
+        ),
+    )
+
+    model.eval()
+    target = []
+    predicted = []
+    for src, tgt in test_loader:
+        start_tokens = (torch.ones((1, 1)) * 1).long().cuda()
+
+        sample = model.module.generate(src, start_tokens, MAX_LEN)
+
+        sample = mpp_generate_postprocessing(sample, eos_token=0)
+
+        # print(f"input:  ", src)
+        # print(f"target:", tgt)
+        # print(f"predicted output:  ", sample)
+
+        target.append(ids_to_tokens(tgt.tolist()[0], vocabulary))
+        predicted.append(ids_to_tokens(sample.tolist()[0], vocabulary))
+
+    target_bleu = [BPE_to_eval(sentence) for sentence in target]
+
+    predicted_bleu = [BPE_to_eval(sentence) for sentence in predicted]
+
+    bleu = sacrebleu.corpus_bleu(predicted_bleu, [target_bleu])
+    bleu = bleu.score
+
+    print('bleu test equal = ', bleu)
+
+
 if __name__ == '__main__':
-    main()
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--train", help="train the model", action="store", default=False)
+    parser.add_argument("--test", help="test the model", action="store", default=False)
+
+    args = parser.parse_args()
+
+    # Now you can access the input and output file names as follows:
+    is_training = args.train
+    is_testing = args.test
+
+    if eval(is_training):
+        print("training mode")
+        main()
+    if eval(is_testing):
+        print("testing mode")
+        test()

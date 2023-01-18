@@ -70,11 +70,12 @@ class MyCollate:
 
 def mpp_generate_postprocessing(tensor_ids, eos_token):
     list_ids = tensor_ids.tolist()[0]
-    print(list_ids)
+
     try:
         target_index = list_ids.index(eos_token) + 1
-        print(target_index)
     except ValueError:
         target_index = None
 
-    return tensor_ids[0][:target_index]
+    tensor_ids[0] = tensor_ids[0][:target_index]
+
+    return tensor_ids

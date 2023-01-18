@@ -1,14 +1,14 @@
 #!/bin/bash
 
-#SBATCH --job-name=wmt-en2de
+#SBATCH --job-name=wmt-en2de-test
 
-#SBATCH --qos=qos_gpu-t4
+#SBATCH --qos=qos_gpu-t3
 
 #SBATCH --output=./logfiles/logfile_wmt.out
 
 #SBATCH --error=./logfiles/logfile_wmt.err
 
-#SBATCH --time=50:00:00
+#SBATCH --time=01:00:00
 
 #SBATCH --ntasks=1
 
@@ -29,4 +29,4 @@ nvidia-smi
 # This will create a config file on your server
 
 
-srun accelerate launch --multi_gpu train_enc_dec_mp.py --train=True --test=True
+srun accelerate launch --multi_gpu train_enc_dec_mp.py --train=False --test=True

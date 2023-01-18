@@ -73,7 +73,8 @@ def mpp_generate_postprocessing(tensor_ids, eos_token):
     print(list_ids)
     try:
         target_index = list_ids.index(eos_token) + 1
+        print(target_index)
     except ValueError:
         target_index = None
 
-    return tensor_ids[:target_index]
+    return tensor_ids[0][:target_index]

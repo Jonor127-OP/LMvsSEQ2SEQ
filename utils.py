@@ -76,6 +76,4 @@ def mpp_generate_postprocessing(tensor_ids, eos_token):
     except ValueError:
         target_index = None
 
-    tensor_ids[0] = tensor_ids[0][:target_index]
-
-    return tensor_ids
+    return tensor_ids[0][:target_index]

@@ -262,13 +262,13 @@ def test():
     target = []
     predicted = []
     for src, tgt in test_loader:
-        # start_tokens = (torch.ones((1, 1)) * 1).long().cuda()
+        start_tokens = (torch.ones((1, 1)) * 1).long().cuda()
+
+        sample = model.module.generate(src, start_tokens, MAX_LEN)
+
+        # start_tokens = (torch.ones((1, 1)) * 1).long()
         #
-        # sample = model.module.generate(src, start_tokens, MAX_LEN)
-
-        start_tokens = (torch.ones((1, 1)) * 1).long()
-
-        sample = model.generate(src, start_tokens, MAX_LEN)
+        # sample = model.generate(src, start_tokens, MAX_LEN)
 
         print('sample1', sample)
 

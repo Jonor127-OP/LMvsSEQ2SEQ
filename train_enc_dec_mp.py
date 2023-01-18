@@ -91,8 +91,6 @@ def main():
     dev_dataset = TextSamplerDataset(X_dev, Y_dev, MAX_LEN)
     dev_loader  = DataLoader(dev_dataset, batch_size=1)
 
-
-
     # with gzip.open('dataset/nl/wmt17_en_de/valid.en.ids.gz', 'r') as file:
     #     X_dev = file.read()
     #     X_dev = X_dev.decode(encoding='utf-8')

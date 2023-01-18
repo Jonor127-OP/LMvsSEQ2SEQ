@@ -277,11 +277,7 @@ def test():
         #
         # sample = model.generate(src, start_tokens, MAX_LEN)
 
-        print('sample1', sample)
-
         sample = mpp_generate_postprocessing(sample, eos_token=0)
-
-        print('sample2', sample)
 
         # print(f"input:  ", ids_to_tokens(src.tolist()[0], vocabulary))
         # print(f"target:", ids_to_tokens(tgt.tolist()[0], vocabulary))

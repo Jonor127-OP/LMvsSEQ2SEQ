@@ -267,12 +267,20 @@ def test():
         start_tokens = (torch.ones((1, 1)) * 1).long().cuda()
 
         sample = model.module.generate(src, start_tokens, MAX_LEN)
+        #
+        # start_tokens = (torch.ones((1, 1)) * 1).long()
+        #
+        # sample = model.generate(src, start_tokens, MAX_LEN)
+
+        print('sample1', sample)
 
         sample = mpp_generate_postprocessing(sample, eos_token=0)
 
-        print(f"input:  ", ids_to_tokens(src.tolist()[0], vocabulary))
-        print(f"target:", ids_to_tokens(tgt.tolist()[0], vocabulary))
-        print(f"predicted output:  ", ids_to_tokens(sample.tolist()[0], vocabulary))
+        print('sample2', sample)
+
+        # print(f"input:  ", ids_to_tokens(src.tolist()[0], vocabulary))
+        # print(f"target:", ids_to_tokens(tgt.tolist()[0], vocabulary))
+        # print(f"predicted output:  ", ids_to_tokens(sample.tolist()[0], vocabulary))
 
         target.append(ids_to_tokens(tgt.tolist()[0], vocabulary))
         predicted.append(ids_to_tokens(sample.tolist()[0], vocabulary))

@@ -19,7 +19,7 @@ from accelerate import Accelerator, DistributedDataParallelKwargs, InitProcessGr
 
 import sacrebleu
 
-def main():
+def main(finetuning):
 
     ddp_kwargs_1 = DistributedDataParallelKwargs(find_unused_parameters=True)
     ddp_kwargs_2 = InitProcessGroupKwargs(timeout=datetime.timedelta(seconds=5400))
@@ -118,6 +118,13 @@ def main():
     scheduler = get_constant_schedule_with_warmup(optimizer, num_warmup_steps=WARMUP_STEP)
 
     model, optimizer, train_loader, dev_loader = accelerator.prepare(model, optimizer, train_loader, dev_loader)
+
+    if finetuning:
+        model.load_state_dict(
+            torch.load(
+                'output/model_seq2seq.pt',
+            ),
+        )
 
     report_loss = 0.
     best_bleu = 0
@@ -308,7 +315,7 @@ if __name__ == '__main__':
 
     if eval(is_training):
         print("training mode")
-        main()
+        main(finetuning=True)
     if eval(is_testing):
         print("testing mode")
         test()

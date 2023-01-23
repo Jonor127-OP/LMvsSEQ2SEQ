@@ -37,12 +37,12 @@ def main(finetuning):
 
     EPOCHS = 10
     BATCH_SIZE = 156
-    LEARNING_RATE = 3e-4
+    LEARNING_RATE = 1e-5
     GENERATE_EVERY  = 1
     ENC_SEQ_LEN = 120
     DEC_SEQ_LEN = 120
     MAX_LEN = 120
-    WARMUP_STEP = 1000
+    WARMUP_STEP = 4000
 
     model = XTransformer(
         dim = 512,
@@ -120,6 +120,7 @@ def main(finetuning):
     model, optimizer, train_loader, dev_loader = accelerator.prepare(model, optimizer, train_loader, dev_loader)
 
     if finetuning:
+        print('finetune')
         model.load_state_dict(
             torch.load(
                 'output/model_seq2seq.pt',
@@ -311,7 +312,7 @@ if __name__ == '__main__':
 
     if eval(is_training):
         print("training mode")
-        main(finetuning=True)
+        main(finetuning=False)
     if eval(is_testing):
         print("testing mode")
         test()

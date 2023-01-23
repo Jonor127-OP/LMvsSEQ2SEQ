@@ -899,7 +899,7 @@ class AttentionLayers(nn.Module):
             sandwich_norm=False,
             zero_init_branch_output=False,
             layer_dropout=0.1,
-            cross_attn_tokens_dropout=0.,
+            cross_attn_tokens_dropout=0.1,
             **kwargs
     ):
         super().__init__()
@@ -1454,11 +1454,11 @@ class XTransformer(nn.Module):
 
         assert 'dim' not in enc_kwargs and 'dim' not in dec_kwargs, 'dimension of either encoder or decoder must be set with `dim` keyword'
         enc_transformer_kwargs = pick_and_pop(['num_tokens', 'max_seq_len'], enc_kwargs)
-        enc_transformer_kwargs['emb_dropout'] = enc_kwargs.pop('emb_dropout', 0)
+        enc_transformer_kwargs['emb_dropout'] = enc_kwargs.pop('emb_dropout', 0.1)
         enc_transformer_kwargs['num_memory_tokens'] = enc_kwargs.pop('num_memory_tokens', None)
 
         dec_transformer_kwargs = pick_and_pop(['num_tokens', 'max_seq_len'], dec_kwargs)
-        dec_transformer_kwargs['emb_dropout'] = dec_kwargs.pop('emb_dropout', 0)
+        dec_transformer_kwargs['emb_dropout'] = dec_kwargs.pop('emb_dropout', 0.1)
 
         self.cross_attn_tokens_dropout = cross_attn_tokens_dropout  # how many tokens from the encoder to dropout when cross attending from decoder - seen in a couple papers, including Perceiver AR - this will also be very effective regularization when cross attending to very long memories
 

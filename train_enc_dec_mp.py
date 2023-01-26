@@ -35,7 +35,7 @@ def main(finetuning):
 
     # constants
 
-    EPOCHS = 10
+    EPOCHS = 20
     BATCH_SIZE = 156
     LEARNING_RATE = 1e-5
     GENERATE_EVERY  = 1

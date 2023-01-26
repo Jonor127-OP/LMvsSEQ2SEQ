@@ -111,11 +111,18 @@ for l in $src $tgt; do
     echo ""
 done
 
-echo "splitting train and valid..."
+pwd
+
+echo "get dev set"
 for l in $src $tgt; do
-    awk '{if (NR%100 == 0)  print $0; }' $tmp/train.tags.$lang.tok.$l > $tmp/valid.$l
-    awk '{if (NR%100 != 0)  print $0; }' $tmp/train.tags.$lang.tok.$l > $tmp/train.$l
+    cp $orig/dev/newstest2013.$l $tmp/valid.$l
 done
+
+#echo "splitting train and valid..."
+#for l in $src $tgt; do
+#    awk '{if (NR%100 == 0)  print $0; }' $tmp/train.tags.$lang.tok.$l > $tmp/valid.$l
+#    awk '{if (NR%100 != 0)  print $0; }' $tmp/train.tags.$lang.tok.$l > $tmp/train.$l
+#done
 
 TRAIN=$tmp/train.de-en
 BPE_CODE=$prep/code
@@ -135,9 +142,9 @@ for L in $src $tgt; do
 done
 
 perl $CLEAN -ratio 1.5 $tmp/bpe.train $src $tgt $prep/train 1 250
-perl $CLEAN -ratio 1.5 $tmp/bpe.valid $src $tgt $prep/valid 1 250
 
 for L in $src $tgt; do
+    cp $tmp/bpe.valid.$L $prep/valid.$L
     cp $tmp/bpe.test.$L $prep/test.$L
 done
 

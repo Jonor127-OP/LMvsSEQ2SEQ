@@ -280,12 +280,12 @@ def test():
 
         sample = mpp_generate_postprocessing(sample, eos_token=0)
 
-        print(f"input:  ", ids_to_tokens(src.tolist()[0], vocabulary))
-        print(f"target:", ids_to_tokens(tgt.tolist()[0], vocabulary))
-        print(f"predicted output:  ", ids_to_tokens(sample.tolist()[0], vocabulary))
+        print(f"input:  ", ids_to_tokens(src.tolist()[0][1:-1], vocabulary))
+        print(f"target:", ids_to_tokens(tgt.tolist()[0][1:-1], vocabulary))
+        print(f"predicted output:  ", ids_to_tokens(sample.tolist()[0][:-1], vocabulary))
 
-        target.append(ids_to_tokens(tgt.tolist()[0], vocabulary))
-        predicted.append(ids_to_tokens(sample.tolist()[0], vocabulary))
+        target.append(ids_to_tokens(tgt.tolist()[0][1:-1], vocabulary))
+        predicted.append(ids_to_tokens(sample.tolist()[0][:-1], vocabulary))
 
     target_bleu = [BPE_to_eval(sentence) for sentence in target]
 

@@ -29,4 +29,4 @@ nvidia-smi
 # This will create a config file on your server
 
 
-srun accelerate launch --multi_gpu e
+srun accelerate launch --multi_gpu train_enc_dec_mp.py --train=False --test=True

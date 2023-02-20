@@ -35,13 +35,13 @@ def main(finetuning):
 
     # constants
 
-    EPOCHS = 20
+    EPOCHS = 40
     BATCH_SIZE = 156
-    LEARNING_RATE = 1e-5
+    LEARNING_RATE = 1e-4
     GENERATE_EVERY  = 1
     ENC_SEQ_LEN = 120
     DEC_SEQ_LEN = 120
-    MAX_LEN = 120
+    MAX_LEN = 130
     WARMUP_STEP = 4000
 
     model = XTransformer(

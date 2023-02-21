@@ -41,7 +41,7 @@ def main(finetuning):
     GENERATE_EVERY  = 1
     ENC_SEQ_LEN = 120
     DEC_SEQ_LEN = 120
-    MAX_LEN = 130
+    MAX_LEN = 120
     WARMUP_STEP = 4000
 
     model = XTransformer(
